@@ -553,7 +553,6 @@ export default function InterviewDetail() {
         hiring_reason: '',
         recommended_level: '',
         comprehensive_score: 0,
-        level_gap: 0,
       })
       setClearAssessModalVisible(false)
       if (clearAssessCallback) {

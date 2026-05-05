@@ -1,10 +1,10 @@
-import type { AssessmentData } from '@/types'
+import type { AssessmentData, InterviewDetail } from '@/types'
 import { readFile, writeFile, getConfig } from '@/core/filesystem'
 import { parseMarkdown, stringifyMarkdown } from '@/core/markdown'
 import { callAIWithJSON } from '@/core/ai'
 import { getPromptsForJobRole } from '@/core/plugin'
 import { getDimensionScores } from '../scoring'
-import { findInterviewDir, getInterview } from '../interview'
+import { findInterviewDir, getInterviewDetail } from '../interview'
 
 export class AssessmentNotFoundError extends Error {
   constructor(public interviewId: string) {
@@ -59,7 +59,7 @@ export async function assess(
 ): Promise<AssessmentData> {
   const interviewDir = await findInterviewDir(interviewId)
   if (!interviewDir) throw new Error(`Interview not found: ${interviewId}`)
-  const interview = await getInterview(interviewId)
+  const interview = await getInterviewDetail(interviewId)
   if (interview.status !== 'completed') throw new AssessmentNotCompletedError(interviewId)
 
   const { dimensions, totalScore } = await getDimensionScores(interviewId)
@@ -124,7 +124,7 @@ export async function assessWithScores(
 ): Promise<AssessmentData> {
   const interviewDir = await findInterviewDir(interviewId)
   if (!interviewDir) throw new Error(`Interview not found: ${interviewId}`)
-  const interview = await getInterview(interviewId)
+  const interview = await getInterviewDetail(interviewId)
 
   const comprehensiveScore = candidateAvg + candidateBonus + Object.values(interviewerRatings).reduce((a, b) => a + b, 0) / Object.values(interviewerRatings).filter(v => v > 0).length
   const recommendedLevel = determineRecommendedLevel(comprehensiveScore, interview.target_level)

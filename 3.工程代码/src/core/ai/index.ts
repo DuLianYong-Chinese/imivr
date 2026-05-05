@@ -1,7 +1,7 @@
 import { AICallError, AIResponseParseError } from './errors'
 
 export interface AIConfig {
-  provider: 'openai' | 'qwen' | 'custom'
+  provider: 'openai' | 'qwen' | 'finna' | 'deepseek' | 'custom' | string
   apiKey: string
   baseURL?: string
   model?: string
@@ -41,11 +41,14 @@ export async function callAI(
 
   switch (aiConfig.provider) {
     case 'openai':
+    case 'finna':
+    case 'deepseek':
+    case 'custom':
       return callOpenAI(finalPrompt)
     case 'qwen':
       return callQwenAI(finalPrompt)
     default:
-      throw new AICallError(`Unsupported AI provider: ${aiConfig.provider}`)
+      return callOpenAI(finalPrompt)
   }
 }
 
