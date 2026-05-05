@@ -1,0 +1,3 @@
+不要使用npm命令，全部替换成pnpm命令
+不需要每次都build项目，在我需要时再build
+写代码时，要时刻遵守CLAUDE.md的skill的规则
