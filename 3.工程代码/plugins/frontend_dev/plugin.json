@@ -1,0 +1,21 @@
+{
+  "plugin_id": "frontend_dev",
+  "name": "前端开发工程师",
+  "category": "技术研发",
+  "version": "1.0.0",
+  "description": "前端开发工程师面试插件，涵盖HTML/CSS/JavaScript、Vue/React框架、前端工程化等考察维度",
+  "evaluation_dimensions": [
+    { "name": "基础语法", "weight": 0.2, "description": "HTML/CSS/JavaScript基础" },
+    { "name": "框架原理", "weight": 0.25, "description": "Vue/React等框架底层原理" },
+    { "name": "工程化", "weight": 0.2, "description": "构建工具、CI/CD、代码规范" },
+    { "name": "性能优化", "weight": 0.2, "description": "加载性能、渲染性能优化" },
+    { "name": "项目经验", "weight": 0.15, "description": "实际项目经验与贡献" }
+  ],
+  "difficulty_mapping": {
+    "L1": ["HTML/CSS基础", "JavaScript基础语法", "DOM操作"],
+    "L2": ["JavaScript闭包原型链", "框架使用", "CSS布局"],
+    "L3": ["组件设计模式", "状态管理", "网络请求"],
+    "L4": ["前端架构方案", "工程化体系", "性能优化方案"],
+    "L5": ["性能极致优化", "底层原理", "框架源码"]
+  }
+}
