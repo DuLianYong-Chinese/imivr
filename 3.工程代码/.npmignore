@@ -1,0 +1,17 @@
+node_modules/
+src/
+public/
+electron/
+plugins/
+vite/
+vite.config.ts
+tsconfig.json
+tsconfig.node.json
+tsup.config.ts
+.eslintrc.cjs
+index.html
+.imivr/
+demo/
+workspaces/
+*.log
+.trae/
