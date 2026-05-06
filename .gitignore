@@ -12,6 +12,8 @@ vue.config.js
 *.ntvs*
 *.njsproj
 *.sln
+*.zip
+*.7z
 node_modules.zip
 node_modules.7z
 .imivr/
