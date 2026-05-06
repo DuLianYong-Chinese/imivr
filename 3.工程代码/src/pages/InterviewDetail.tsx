@@ -630,11 +630,6 @@ export default function InterviewDetail() {
 
   const generatingBar = generating && (
     <div style={{
-      position: 'fixed',
-      top: 64,
-      left: 27,
-      right: 26,
-      zIndex: 1000,
       background: colors.primary,
       color: '#fff',
       padding: '6px 24px',
@@ -644,8 +639,6 @@ export default function InterviewDetail() {
       gap: 8,
       fontSize: 13,
       fontWeight: 500,
-      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-      borderRadius: '8px',
     }}>
       <RobotOutlined spin />
       正在生成问题，请勿离开页面...
@@ -656,9 +649,9 @@ export default function InterviewDetail() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {generatingBar}
       <div style={{ flexShrink: 0, padding: '24px 24px 0 24px' }}>
       <div style={{ marginBottom: 20, background: colors.surface, borderRadius: 14, border: `1px solid ${colors.border}`, overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.04)' }}>
+        {generatingBar}
         <div style={{
           height: 4,
           background: `linear-gradient(90deg, ${
