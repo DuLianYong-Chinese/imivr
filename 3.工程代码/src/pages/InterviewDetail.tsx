@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Card, Descriptions, Button, Tag, Steps, message, Tabs, Upload, Modal, Input, Form, Select, Space, Spin, Rate } from 'antd'
+import { Card, Descriptions, Button, Tag, Steps, App, Tabs, Upload, Modal, Input, Form, Select, Space, Spin, Rate } from 'antd'
 import { ArrowLeftOutlined, PlayCircleOutlined, CheckCircleOutlined, UploadOutlined, FileTextOutlined, RobotOutlined, EditOutlined, DeleteOutlined, EyeOutlined, TagOutlined, ReloadOutlined, UserOutlined, CalendarOutlined } from '@ant-design/icons'
 import type { InterviewDetail } from '@/types'
 import { getInterviewDetail, startInterview, endInterview, saveResume, generateQuestions, findInterviewDir, generateCandidateTags, getCandidateTags, saveCandidateTags, saveAnswer, saveAssessment } from '@/modules/interview'
@@ -33,6 +33,7 @@ const difficultyConfig: Record<string, { label: string; color: string; bgColor: 
 }
 
 export default function InterviewDetail() {
+  const { message } = App.useApp()
   const { colors } = useThemeStore()
   const { setCurrentInterview } = useAppStore()
   const { jobRole, interviewId } = useParams<{ jobRole: string; interviewId: string }>()
@@ -72,7 +73,6 @@ export default function InterviewDetail() {
   const [jdLoading, setJdLoading] = useState(false)
   const [jdFullContent, setJdFullContent] = useState('')
   const [resumeForm] = Form.useForm()
-  const [questionForm] = Form.useForm()
 
   // 新增状态
   const [selectedDifficultyLevels, setSelectedDifficultyLevels] = useState<string[]>([])

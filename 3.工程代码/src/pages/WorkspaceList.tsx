@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Button, Space, Tag, Modal, Form, Input, Select, AutoComplete, message, Spin } from 'antd'
+import { Button, Space, Tag, Modal, Form, Input, Select, AutoComplete, App, Spin } from 'antd'
 import { PlusOutlined, DeleteOutlined, RightOutlined, CodeOutlined, FormatPainterOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { WorkspaceInfo, CreateWorkspaceInput, Dimension } from '@/types'
@@ -28,6 +28,7 @@ const defaultDimensions: Dimension[] = [
 ]
 
 export default function WorkspaceList() {
+  const { message } = App.useApp()
   const navigate = useNavigate()
   const { colors } = useThemeStore()
   const [workspaces, setWorkspaces] = useState<WorkspaceInfo[]>([])

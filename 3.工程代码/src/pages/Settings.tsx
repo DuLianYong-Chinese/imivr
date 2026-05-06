@@ -316,7 +316,6 @@ export default function Settings() {
   const { colors } = useThemeStore()
   const { message } = App.useApp()
 
-  const [form] = Form.useForm()
   const [loading, setLoading] = useState(true)
   const [config, setConfig] = useState<any>({})
   const [configPath, setConfigPath] = useState<string>('')
@@ -969,7 +968,7 @@ export default function Settings() {
         onOk={() => modelForm.submit()}
         onCancel={() => setIsModalOpen(false)}
         width={600}
-        destroyOnClose
+        destroyOnHidden
       >
         {modelFormItems(modelForm, false)}
       </Modal>
@@ -980,7 +979,7 @@ export default function Settings() {
         onOk={() => voiceModelForm.submit()}
         onCancel={() => setIsVoiceModalOpen(false)}
         width={600}
-        destroyOnClose
+        destroyOnHidden
       >
         {modelFormItems(voiceModelForm, true)}
       </Modal>

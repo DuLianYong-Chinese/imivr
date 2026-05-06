@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Card, Button, Modal, Form, Input, Tag, message, Radio, Upload, Tabs, Space } from 'antd'
+import { Card, Button, Modal, Form, Input, Tag, App, Radio, Upload, Tabs, Space } from 'antd'
 import { EditOutlined, EyeOutlined, UploadOutlined, UpOutlined, DownOutlined } from '@ant-design/icons'
 import type { UploadFile } from 'antd/es/upload/interface'
 import { readFile, writeFile, exists, createDirectory } from '@/core/filesystem'
@@ -126,6 +126,7 @@ interface QuestionBankCardsProps {
 }
 
 export default function QuestionBankCards({ jobRole, onDataChange }: QuestionBankCardsProps) {
+  const { message } = App.useApp()
   const { colors } = useThemeStore()
   const [, setLoading] = useState(false)
   const [banks, setBanks] = useState<QuestionBankItem[]>([])

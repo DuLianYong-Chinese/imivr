@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Button, Tabs, message, Spin, Tag } from 'antd'
+import { Button, Tabs, App, Spin, Tag } from 'antd'
 import { ArrowLeftOutlined, PlayCircleOutlined, TeamOutlined, FileTextOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import type { WorkspaceDetail } from '@/types'
 import { getWorkspaceDetail } from '@/modules/workspace'
@@ -20,6 +20,7 @@ const presetIcons: Record<string, { icon: string; bg: string }> = {
 }
 
 export default function WorkspaceDetail() {
+  const { message } = App.useApp()
   const { colors } = useThemeStore()
   const { jobRole } = useParams<{ jobRole: string }>()
   const navigate = useNavigate()

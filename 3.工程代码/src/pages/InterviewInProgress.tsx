@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Button, message, Rate, Input, Tooltip, Spin, Tag, Modal, Form, Select } from 'antd'
+import { Button, App, Rate, Input, Tooltip, Spin, Tag, Modal, Select } from 'antd'
 import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
@@ -54,6 +54,7 @@ function getJobRoleName(jobRole: string): string {
 }
 
 export default function InterviewInProgress() {
+  const { message } = App.useApp()
   const { colors, config } = useThemeStore()
   const isDark = config.mode === 'dark'
   const { jobRole, interviewId } = useParams<{ jobRole: string; interviewId: string }>()
@@ -78,7 +79,6 @@ export default function InterviewInProgress() {
   const [difficultyDistributions, setDifficultyDistributions] = useState<Record<string, number>>({})
   const [selectedTags, setSelectedTags] = useState<Record<string, number>>({})
   const [candidateTagsData, setCandidateTagsData] = useState<CandidateTag[]>([])
-  const [questionForm] = Form.useForm()
   const streamRef = useRef<HTMLDivElement>(null)
 
   const audioRecorderRef = useRef<AudioRecorder | null>(null)
@@ -661,7 +661,6 @@ export default function InterviewInProgress() {
               onClick={() => {
                 setSelectedDifficultyLevels(interview?.difficulty_levels as string[] || [])
                 setSelectedTags({})
-                questionForm.resetFields()
                 setGenerateModalVisible(true)
               }}
               style={{ borderRadius: 8, height: 31 }}
@@ -990,7 +989,6 @@ export default function InterviewInProgress() {
         open={generateModalVisible}
         onCancel={() => {
           setGenerateModalVisible(false)
-          questionForm.resetFields()
           setSelectedTags({})
         }}
         onOk={async () => {

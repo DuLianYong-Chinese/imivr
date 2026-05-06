@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Card, Button, Modal, Form, Input, Tag, message, Radio, Upload, Tabs, Space } from 'antd'
+import { Card, Button, Modal, Form, Input, Tag, App, Radio, Upload, Tabs, Space } from 'antd'
 import { ArrowLeftOutlined, EditOutlined, EyeOutlined, UploadOutlined, UpOutlined, DownOutlined } from '@ant-design/icons'
 import type { UploadFile, RcFile } from 'antd/es/upload/interface'
 import { readFile, writeFile, exists, createDirectory } from '@/core/filesystem'
@@ -131,6 +131,7 @@ function SearchHighlighter({ content, searchText, currentIndex, onMatchesChange,
 }
 
 export default function QuestionBank() {
+  const { message } = App.useApp()
   const { colors } = useThemeStore()
   const { jobRole } = useParams<{ jobRole: string }>()
   const navigate = useNavigate()

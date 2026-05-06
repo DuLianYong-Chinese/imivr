@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, Button, Modal, Form, Input, Tag, message } from 'antd'
+import { Card, Button, Modal, Form, Input, Tag, App } from 'antd'
 import { EditOutlined, EyeOutlined, PlusOutlined, DeleteOutlined, FileTextOutlined } from '@ant-design/icons'
 import { readFile, writeFile, exists, deleteFile, listFiles } from '@/core/filesystem'
 import { useThemeStore } from '@/stores/themeStore'
@@ -19,6 +19,7 @@ interface JDManagementCardsProps {
 }
 
 export default function JDManagementCards({ jobRole, onDataChange }: JDManagementCardsProps) {
+  const { message } = App.useApp()
   const { colors } = useThemeStore()
   const [, setLoading] = useState(false)
   const [jdConfigs, setJdConfigs] = useState<JDConfigItem[]>([])

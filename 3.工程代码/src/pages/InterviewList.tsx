@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Table, Button, Modal, Form, Input, Select, DatePicker, message, Tag, Checkbox, Tooltip, Spin } from 'antd'
+import { Table, Button, Modal, Form, Input, Select, DatePicker, App, Tag, Checkbox, Tooltip, Spin } from 'antd'
 import { PlusOutlined, ArrowLeftOutlined, DeleteOutlined, EditOutlined, RightOutlined, UserOutlined, CalendarOutlined, EyeOutlined, FileTextOutlined } from '@ant-design/icons'
 import type { Interview } from '@/types'
 import { listInterviews, createInterview, deleteInterview, updateInterview } from '@/modules/interview'
@@ -40,6 +40,7 @@ interface JDOption {
 }
 
 export default function InterviewList() {
+  const { message } = App.useApp()
   const { jobRole } = useParams<{ jobRole: string }>()
   const navigate = useNavigate()
   const { colors } = useThemeStore()
@@ -452,7 +453,7 @@ export default function InterviewList() {
         onOk={() => form.submit()}
         onCancel={() => setModalVisible(false)}
         width={600}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical" onFinish={handleCreate}>
           <Form.Item
@@ -520,7 +521,7 @@ export default function InterviewList() {
           setEditingInterview(null)
         }}
         width={600}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={editForm} layout="vertical" onFinish={handleUpdate}>
           <Form.Item name="candidate_name" label="候选人姓名">
