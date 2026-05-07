@@ -46,8 +46,28 @@ function ensureConfigExists(): { configDir: string; configFile: string; workspac
       version: '1.0.0',
       initialized: true,
       workspaceRoot: defaultWsRoot,
-      aiModels: [],
-      aiVoiceModels: [],
+      aiModels: [
+        {
+          id: '1777648353899',
+          name: '问答模型',
+          provider: 'finna',
+          apiKey: 'app-IkDtFuscGWAj2RHbjRdo7vR7',
+          baseURL: 'https://www.finna.com.cn/v1',
+          model: 'deepseek-v4-pro',
+          isDefault: true,
+        },
+      ],
+      aiVoiceModels: [
+        {
+          id: '1777648395345',
+          name: '语音模型',
+          provider: 'finna',
+          apiKey: 'app-s30gwLaPj0RVLh6bqopm8mG7',
+          baseURL: 'https://www.finna.com.cn/v1',
+          model: 'qwen3-asr-flash',
+          isDefault: true,
+        },
+      ],
     }
     writeFileSync(configFile, JSON.stringify(initialConfig, null, 2))
   }
@@ -57,6 +77,39 @@ function ensureConfigExists(): { configDir: string; configFile: string; workspac
     const config = JSON.parse(readFileSync(configFile, 'utf-8'))
     if (config.workspaceRoot && existsSync(config.workspaceRoot)) {
       workspaceRoot = config.workspaceRoot
+    }
+    let configChanged = false
+    if (!config.aiModels || !Array.isArray(config.aiModels) || config.aiModels.length === 0) {
+      config.aiModels = [
+        {
+          id: '1777648353899',
+          name: '问答模型',
+          provider: 'finna',
+          apiKey: 'app-IkDtFuscGWAj2RHbjRdo7vR7',
+          baseURL: 'https://www.finna.com.cn/v1',
+          model: 'deepseek-v4-pro',
+          isDefault: true,
+        },
+      ]
+      configChanged = true
+    }
+    if (!config.aiVoiceModels || !Array.isArray(config.aiVoiceModels) || config.aiVoiceModels.length === 0) {
+      config.aiVoiceModels = [
+        {
+          id: '1777648395345',
+          name: '语音模型',
+          provider: 'finna',
+          apiKey: 'app-s30gwLaPj0RVLh6bqopm8mG7',
+          baseURL: 'https://www.finna.com.cn/v1',
+          model: 'qwen3-asr-flash',
+          isDefault: true,
+        },
+      ]
+      configChanged = true
+    }
+    if (configChanged) {
+      config.updated = new Date().toISOString()
+      writeFileSync(configFile, JSON.stringify(config, null, 2))
     }
   } catch {}
 
@@ -307,8 +360,28 @@ export async function startServer(options: StartOptions): Promise<void> {
       version: '1.0.0',
       initialized: true,
       workspaceRoot: defaultWsRoot,
-      aiModels: [],
-      aiVoiceModels: [],
+      aiModels: [
+        {
+          id: '1777648353899',
+          name: '问答模型',
+          provider: 'finna',
+          apiKey: 'app-IkDtFuscGWAj2RHbjRdo7vR7',
+          baseURL: 'https://www.finna.com.cn/v1',
+          model: 'deepseek-v4-pro',
+          isDefault: true,
+        },
+      ],
+      aiVoiceModels: [
+        {
+          id: '1777648395345',
+          name: '语音模型',
+          provider: 'finna',
+          apiKey: 'app-s30gwLaPj0RVLh6bqopm8mG7',
+          baseURL: 'https://www.finna.com.cn/v1',
+          model: 'qwen3-asr-flash',
+          isDefault: true,
+        },
+      ],
     }
     if (!existsSync(defaultWsRoot)) mkdirSync(defaultWsRoot, { recursive: true })
     writeConfig(initialConfig)
@@ -428,13 +501,28 @@ export async function startServer(options: StartOptions): Promise<void> {
 
   const server = createServer(app)
 
-  server.listen(options.port, '127.0.0.1', () => {
-    const url = `http://127.0.0.1:${options.port}`
-    console.log(`\n  🎯 我是面试官 已启动！`)
-    console.log(`  📍 本地地址: ${url}\n`)
+  function tryListen(port: number, maxRetries: number = 10): void {
+    server.listen(port, '127.0.0.1', () => {
+      const url = `http://127.0.0.1:${port}`
+      console.log(`\n  🎯 我是面试官 已启动！`)
+      console.log(`  📍 本地地址: ${url}\n`)
 
-    if (options.open) {
-      openBrowser(url)
-    }
-  })
+      if (options.open) {
+        openBrowser(url)
+      }
+    })
+
+    server.on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE' && maxRetries > 0) {
+        console.log(`  ⚠️  端口 ${port} 已被占用，尝试端口 ${port + 1}...`)
+        server.close()
+        tryListen(port + 1, maxRetries - 1)
+      } else {
+        console.error(`  ❌ 启动失败: ${err.message}`)
+        process.exit(1)
+      }
+    })
+  }
+
+  tryListen(options.port)
 }

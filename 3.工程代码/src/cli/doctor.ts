@@ -43,9 +43,17 @@ export async function runDoctor(): Promise<void> {
       }
 
       if (config.aiModels && config.aiModels.length > 0) {
-        checks.push({ name: 'AI 模型配置', status: 'ok', message: `已配置 ${config.aiModels.length} 个模型` })
+        const models = config.aiModels.map((m: any) => `${m.provider}/${m.model}`).join(', ')
+        checks.push({ name: '问答模型', status: 'ok', message: `${config.aiModels.length} 个 (${models})` })
       } else {
-        checks.push({ name: 'AI 模型配置', status: 'warn', message: '未配置 AI 模型' })
+        checks.push({ name: '问答模型', status: 'warn', message: '未配置问答模型' })
+      }
+
+      if (config.aiVoiceModels && config.aiVoiceModels.length > 0) {
+        const models = config.aiVoiceModels.map((m: any) => `${m.provider}/${m.model}`).join(', ')
+        checks.push({ name: '语音模型', status: 'ok', message: `${config.aiVoiceModels.length} 个 (${models})` })
+      } else {
+        checks.push({ name: '语音模型', status: 'warn', message: '未配置语音模型' })
       }
 
       if (config.initialized) {
