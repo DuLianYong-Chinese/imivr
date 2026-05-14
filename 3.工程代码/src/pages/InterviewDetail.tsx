@@ -1185,7 +1185,7 @@ export default function InterviewDetail() {
                 </span>
               ),
               children: (
-                <div style={{ height: '100%', overflowY: 'auto' }}>
+                <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                   {interview.questions && (interview.answers?.answers || []).filter((a: any) => a.answer_content || a.score).length > 0 ? (
                     <div>
                       {(() => {
@@ -1216,9 +1216,9 @@ export default function InterviewDetail() {
                         const hasCandidateScore = scoredCount > 0
 
                         return (
-                          <div>
-                            <div style={{ display: 'flex', gap: 24, alignItems: 'stretch' }}>
-                              <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+                            <div style={{ display: 'flex', gap: 24, alignItems: 'stretch', flex: '1 1 auto', minHeight: 0, overflow: 'hidden' }}>
+                              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                                 <div style={{
                                   background: colors.surface,
                                   borderRadius: 8,
@@ -1227,7 +1227,10 @@ export default function InterviewDetail() {
                                   borderBottom: `1px solid ${colors.border}`,
                                   borderLeft: `3px solid ${colors.primary}`,
                                   padding: '20px 24px',
-                                  height: '100%',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  overflow: 'hidden',
+                                  flex: 1,
                                 }}>
                                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                                     <span style={{ fontWeight: 600, fontSize: 15, color: colors.textPrimary }}>候选人回答情况</span>
@@ -1236,6 +1239,7 @@ export default function InterviewDetail() {
                                     </Button>
                                   </div>
 
+                                  <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
                                   <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 6 }}>
                                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                                       <span style={{ fontSize: 32, fontWeight: 700, color: colors.primary, lineHeight: 1 }}>
@@ -1400,6 +1404,7 @@ export default function InterviewDetail() {
                                       })}
                                     </div>
                                   )}
+                                  </div>
                                 </div>
                               </div>
 
@@ -1407,7 +1412,7 @@ export default function InterviewDetail() {
                                 <span style={{ fontSize: 20, fontWeight: 300, color: colors.textTertiary }}>+</span>
                               </div>
 
-                              <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                                 <div style={{
                                   background: colors.surface,
                                   borderRadius: 8,
@@ -1416,7 +1421,10 @@ export default function InterviewDetail() {
                                   borderBottom: `1px solid ${colors.border}`,
                                   borderLeft: '3px solid #722ed1',
                                   padding: '20px 24px',
-                                  height: '100%',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  overflow: 'hidden',
+                                  flex: 1,
                                 }}>
                                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                                   <span style={{ fontWeight: 600, fontSize: 15, color: colors.textPrimary }}>面试官打分</span>
@@ -1427,6 +1435,7 @@ export default function InterviewDetail() {
                                   )}
                                 </div>
 
+                                  <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
                                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 12 }}>
                                     <span style={{ fontSize: 32, fontWeight: 700, color: '#722ed1', lineHeight: 1 }}>
                                       {hasAnyRating ? (Number.isInteger(ratingAvg) ? ratingAvg : ratingAvg.toFixed(1)) : '0'}
@@ -1452,11 +1461,12 @@ export default function InterviewDetail() {
                                       </div>
                                     ))}
                                   </div>
+                                  </div>
                                 </div>
                               </div>
                             </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0', flexShrink: 0 }}>
                               <span style={{ fontSize: 20, fontWeight: 300, color: colors.textTertiary }}>=</span>
                             </div>
 
@@ -1468,6 +1478,7 @@ export default function InterviewDetail() {
                               borderBottom: `1px solid ${colors.border}`,
                               borderLeft: '3px solid #52c41a',
                               padding: '20px 24px',
+                              flexShrink: 0,
                             }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                                 <span style={{ fontWeight: 600, fontSize: 15, color: colors.textPrimary }}>面试综合评价</span>
