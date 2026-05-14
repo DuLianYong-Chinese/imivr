@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Button, App, Rate, Input, Tooltip, Spin, Tag, Modal, Select } from 'antd'
+import { Button, App, Rate, Input, Tooltip, Spin, Tag, Select } from 'antd'
 import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
@@ -12,6 +13,9 @@ import {
   FileTextOutlined,
   SoundOutlined,
   RobotOutlined,
+  MinusOutlined,
+  ExpandOutlined,
+  CloseOutlined,
 } from '@ant-design/icons'
 import type { InterviewDetail, QuestionItem } from '@/types'
 import { getInterviewDetail, endInterview, saveAnswer, updateInterview, generateQuestions, getCandidateTags } from '@/modules/interview'
@@ -72,6 +76,8 @@ export default function InterviewInProgress() {
   const [saving, setSaving] = useState(false)
   const [transcribing, setTranscribing] = useState(false)
   const [generateModalVisible, setGenerateModalVisible] = useState(false)
+  const [modalMinimized, setModalMinimized] = useState(false)
+  const [streamMinimized, setStreamMinimized] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [submittingQuestions, setSubmittingQuestions] = useState(false)
   const [streamContent, setStreamContent] = useState('')
@@ -79,6 +85,7 @@ export default function InterviewInProgress() {
   const [difficultyDistributions, setDifficultyDistributions] = useState<Record<string, number>>({})
   const [selectedTags, setSelectedTags] = useState<Record<string, number>>({})
   const [candidateTagsData, setCandidateTagsData] = useState<CandidateTag[]>([])
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null)
   const streamRef = useRef<HTMLDivElement>(null)
 
   const audioRecorderRef = useRef<AudioRecorder | null>(null)
@@ -97,6 +104,48 @@ export default function InterviewInProgress() {
       return aDiff - bDiff
     })
   }, [interview])
+
+  const getCategoryColor = (category: string): string => {
+    const colorMap: Record<string, string> = {
+      '技术类': '#1677ff',
+      '项目类': '#52c41a',
+      '软技能类': '#fa8c16',
+      '职业规划类': '#722ed1',
+      '岗位挑战类': '#ff4d4f',
+      '领导力类': '#13c2c2',
+      '行业洞察类': '#eb2f96',
+    }
+    return colorMap[category] || colors.primary
+  }
+
+  const getCategoryIcon = (category: string, isActive: boolean = false) => {
+    const iconMap: Record<string, string> = {
+      '技术类': '⚡',
+      '项目类': '🏗',
+      '软技能类': '🤝',
+      '职业规划类': '🎯',
+      '岗位挑战类': '🔥',
+      '领导力类': '👑',
+      '行业洞察类': '💡',
+    }
+    const catColor = getCategoryColor(category)
+    if (iconMap[category]) {
+      return <span style={{ fontSize: 14 }}>{iconMap[category]}</span>
+    }
+    return (
+      <span style={{
+        fontSize: 12,
+        fontWeight: 700,
+        color: catColor,
+        lineHeight: 1,
+      }}>{category.charAt(0)}</span>
+    )
+  }
+
+  const filteredQuestions = useMemo(() => {
+    if (!selectedCategoryFilter) return questions
+    return questions.filter(q => (q.category || '未分类') === selectedCategoryFilter)
+  }, [questions, selectedCategoryFilter])
 
   const handleSaveElapsedTime = async () => {
     if (interviewId && elapsedTimeRef.current > 0) {
@@ -662,6 +711,7 @@ export default function InterviewInProgress() {
                 setSelectedDifficultyLevels(interview?.difficulty_levels as string[] || [])
                 setSelectedTags({})
                 setGenerateModalVisible(true)
+                setModalMinimized(false)
               }}
               style={{ borderRadius: 8, height: 31 }}
             >
@@ -669,13 +719,108 @@ export default function InterviewInProgress() {
             </Button>
           </div>
 
+          {/* 分类标签筛选栏 */}
+          {questions.length > 0 && (() => {
+            const categoryCount: Record<string, number> = {}
+            questions.forEach(q => {
+              const cat = q.category || '未分类'
+              categoryCount[cat] = (categoryCount[cat] || 0) + 1
+            })
+            const categories = Object.entries(categoryCount).sort(([a], [b]) => a.localeCompare(b))
+            const activeKey = selectedCategoryFilter || 'all'
+            return (
+              <div style={{
+                flexShrink: 0,
+                padding: '6px 24px',
+                borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                flexWrap: 'wrap',
+              }}>
+                <div
+                  onClick={() => setSelectedCategoryFilter(null)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    padding: '3px 8px',
+                    borderRadius: 6,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    background: activeKey === 'all'
+                      ? isDark ? 'rgba(255,255,255,0.08)' : colors.primaryBg
+                      : 'transparent',
+                    color: activeKey === 'all' ? colors.primary : colors.textSecondary,
+                    fontWeight: activeKey === 'all' ? 600 : 400,
+                    fontSize: 12,
+                  }}
+                >
+                  <span style={{ fontSize: 12 }}>📋</span>
+                  <span>全部</span>
+                  <span style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: activeKey === 'all' ? colors.primary : colors.textTertiary,
+                    background: activeKey === 'all'
+                      ? isDark ? 'rgba(255,255,255,0.06)' : `${colors.primary}15`
+                      : isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+                    padding: '0 5px',
+                    borderRadius: 6,
+                    lineHeight: '16px',
+                  }}>{questions.length}</span>
+                </div>
+                {categories.map(([cat, count]) => {
+                  const catColor = getCategoryColor(cat)
+                  const isActive = activeKey === cat
+                  return (
+                    <div
+                      key={cat}
+                      onClick={() => setSelectedCategoryFilter(isActive ? null : cat)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        padding: '3px 8px',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        background: isActive
+                          ? isDark ? `${catColor}18` : `${catColor}12`
+                          : 'transparent',
+                        color: isActive ? catColor : colors.textSecondary,
+                        fontWeight: isActive ? 600 : 400,
+                        fontSize: 12,
+                      }}
+                    >
+                      {getCategoryIcon(cat, isActive)}
+                      <span>{cat}</span>
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: isActive ? catColor : colors.textTertiary,
+                        background: isActive
+                          ? isDark ? `${catColor}20` : `${catColor}12`
+                          : isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+                        padding: '0 5px',
+                        borderRadius: 6,
+                        lineHeight: '16px',
+                      }}>{count}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })()}
+
           {/* 题目列表 */}
           <div style={{
             flex: 1,
             overflow: 'auto',
             padding: 20,
           }}>
-            {questions.length === 0 ? (
+            {filteredQuestions.length === 0 ? (
               <div style={{
                 textAlign: 'center',
                 padding: 60,
@@ -686,7 +831,7 @@ export default function InterviewInProgress() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {questions.map((question: QuestionItem, index: number) => {
+                {filteredQuestions.map((question: QuestionItem, index: number) => {
                   const diffConf = getDifficultyConfig(question.difficulty)
                   const isExpanded = expandedQuestionId === question.id
                   const isThisRecording = recordingQuestionId === question.id
@@ -978,141 +1123,352 @@ export default function InterviewInProgress() {
 
       {/* ===== 全局 CSS 动画 ===== */}
 
-      {/* 继续生成问题弹窗 */}
-      <Modal
-        title={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <RobotOutlined style={{ color: colors.primary }} />
-            <span>继续生成问题</span>
-          </div>
-        }
-        open={generateModalVisible}
-        onCancel={() => {
-          setGenerateModalVisible(false)
-          setSelectedTags({})
-        }}
-        onOk={async () => {
-          if (!interviewId) return
-          if (selectedDifficultyLevels.length === 0) {
-            message.error('请至少选择一个题库')
-            return
-          }
-          const tagEntries = Object.entries(selectedTags)
-          if (tagEntries.length === 0) {
-            message.error('请至少选择一个标签')
-            return
-          }
-          const questionCount = tagEntries.reduce((sum, [, count]) => sum + count, 0)
-          const categoryCounts: Record<string, number> = {}
-          tagEntries.forEach(([tag, count]) => { categoryCounts[tag] = count })
-          setSubmittingQuestions(true)
-          setGenerating(true)
-          setStreamContent('')
-          setGenerateModalVisible(false)
-          setSubmittingQuestions(false)
-          try {
-            await generateQuestions(interviewId!, {
-              difficultyLevels: selectedDifficultyLevels,
-              distributions: difficultyDistributions,
-              questionCount: questionCount,
-              selectedCategories: Object.keys(selectedTags),
-              categoryCounts: categoryCounts,
-              onChunk: (chunk) => {
-                setStreamContent(prev => prev + chunk)
-              },
-            })
-            message.success('问题生成完成！')
-            loadInterview()
-          } catch (error: any) {
-            message.error(error.message || '生成问题失败')
-          } finally {
-            setGenerating(false)
-          }
-        }}
-        okText="确认生成"
-        cancelText="取消"
-        confirmLoading={submittingQuestions}
-        width={900}
-      >
-        <div style={{ display: 'flex', gap: 0 }}>
-          <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
-            <div style={{ fontWeight: 600, fontSize: 14, color: colors.textPrimary, marginBottom: 8 }}>
-              选择标签（必选）
-            </div>
-            <TagSelector
-              candidateTags={candidateTagsData}
-              selectedTags={selectedTags}
-              onSelect={setSelectedTags}
-            />
-          </div>
-
-          <div style={{ width: 1, background: colors.border, margin: '4px 0', flexShrink: 0 }} />
-
-          <div style={{ width: 300, flexShrink: 0, paddingLeft: 20, maxHeight: 480, overflowY: 'auto' }}>
-            <div style={{ fontWeight: 600, fontSize: 14, color: colors.textPrimary, marginBottom: 6 }}>
-              选择题库
-            </div>
-            <Select
-              mode="multiple"
-              value={selectedDifficultyLevels}
-              onChange={(value) => {
-                setSelectedDifficultyLevels(value)
-                if (value.length === 0) setDifficultyDistributions({})
-                else if (value.length === 1) setDifficultyDistributions({ [value[0]]: 100 })
-                else setDifficultyDistributions({})
-              }}
-              options={[
-                { value: 'L1-初级', label: 'L1-初级' },
-                { value: 'L2-中级', label: 'L2-中级' },
-                { value: 'L3-高级', label: 'L3-高级' },
-                { value: 'L4-专家', label: 'L4-专家' },
-                { value: 'L5-大神', label: 'L5-大神' },
-              ]}
-              placeholder="请选择题库难度等级"
-              style={{ width: '100%' }}
-            />
-            <p style={{ marginTop: 6, marginBottom: 16, color: colors.textTertiary, fontSize: 11 }}>
-              选择多个题库后，可调整各难度题目占比
-            </p>
-
-            <div style={{ fontWeight: 600, fontSize: 14, color: colors.textPrimary, marginBottom: 6 }}>
-              难度分布比例
-            </div>
-            <DifficultyDistribution
-              selectedLevels={selectedDifficultyLevels}
-              onChange={setDifficultyDistributions}
-            />
-            <p style={{ marginTop: 4, marginBottom: 0, color: colors.textTertiary, fontSize: 11 }}>
-              拖动圆点调整分布，总计必须为 100%
-            </p>
-          </div>
-        </div>
-      </Modal>
-
-      {/* 流式生成内容展示 */}
-      {generating && streamContent && (
+      {/* 继续生成问题弹窗（Portal 到 body 避免被 overflow:hidden 裁剪） */}
+      {generateModalVisible && createPortal(
+        <>
+          {!modalMinimized && (
         <div style={{
           position: 'fixed',
-          bottom: 20,
-          right: 20,
-          width: 400,
-          maxHeight: 300,
-          background: colors.surface,
-          border: `1px solid ${colors.primary}40`,
-          borderRadius: 12,
-          padding: 16,
-          overflow: 'auto',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.45)',
           zIndex: 1000,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: colors.primary, fontWeight: 600 }}>
-            <RobotOutlined spin />
-            正在生成问题...
+          <div style={{
+            width: 900,
+            maxHeight: '80vh',
+            background: colors.surface,
+            borderRadius: 12,
+            boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.5)' : '0 8px 32px rgba(0,0,0,0.15)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}>
+            {/* 弹窗头部 */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 24px',
+              borderBottom: `1px solid ${colors.border}`,
+              flexShrink: 0,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <RobotOutlined style={{ color: colors.primary }} />
+                <span style={{ fontWeight: 600, fontSize: 16, color: colors.textPrimary }}>继续生成问题</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Tooltip title="收起弹窗">
+                  <Button
+                    type="text"
+                    icon={<MinusOutlined />}
+                    size="small"
+                    onClick={() => setModalMinimized(true)}
+                    style={{ borderRadius: 6 }}
+                  />
+                </Tooltip>
+                <Button
+                  type="text"
+                  icon={<CloseOutlined />}
+                  size="small"
+                  onClick={() => {
+                    setGenerateModalVisible(false)
+                    setModalMinimized(false)
+                    setSelectedTags({})
+                  }}
+                  style={{ borderRadius: 6 }}
+                />
+              </div>
+            </div>
+
+            {/* 弹窗内容 */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+              <div style={{ display: 'flex', gap: 0 }}>
+                <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: colors.textPrimary, marginBottom: 8 }}>
+                    选择标签（必选）
+                  </div>
+                  <TagSelector
+                    candidateTags={candidateTagsData}
+                    selectedTags={selectedTags}
+                    onSelect={setSelectedTags}
+                  />
+                </div>
+
+                <div style={{ width: 1, background: colors.border, margin: '4px 0', flexShrink: 0 }} />
+
+                <div style={{ width: 300, flexShrink: 0, paddingLeft: 20, maxHeight: 480, overflowY: 'auto' }}>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: colors.textPrimary, marginBottom: 6 }}>
+                    选择题库
+                  </div>
+                  <Select
+                    mode="multiple"
+                    value={selectedDifficultyLevels}
+                    onChange={(value) => {
+                      setSelectedDifficultyLevels(value)
+                      if (value.length === 0) setDifficultyDistributions({})
+                      else if (value.length === 1) setDifficultyDistributions({ [value[0]]: 100 })
+                      else setDifficultyDistributions({})
+                    }}
+                    options={[
+                      { value: 'L1-初级', label: 'L1-初级' },
+                      { value: 'L2-中级', label: 'L2-中级' },
+                      { value: 'L3-高级', label: 'L3-高级' },
+                      { value: 'L4-专家', label: 'L4-专家' },
+                      { value: 'L5-大神', label: 'L5-大神' },
+                    ]}
+                    placeholder="请选择题库难度等级"
+                    style={{ width: '100%' }}
+                  />
+                  <p style={{ marginTop: 6, marginBottom: 16, color: colors.textTertiary, fontSize: 11 }}>
+                    选择多个题库后，可调整各难度题目占比
+                  </p>
+
+                  <div style={{ fontWeight: 600, fontSize: 14, color: colors.textPrimary, marginBottom: 6 }}>
+                    难度分布比例
+                  </div>
+                  <DifficultyDistribution
+                    selectedLevels={selectedDifficultyLevels}
+                    onChange={setDifficultyDistributions}
+                  />
+                  <p style={{ marginTop: 4, marginBottom: 0, color: colors.textTertiary, fontSize: 11 }}>
+                    拖动圆点调整分布，总计必须为 100%
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 弹窗底部按钮 */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: 8,
+              padding: '12px 24px',
+              borderTop: `1px solid ${colors.border}`,
+              flexShrink: 0,
+            }}>
+              <Button
+                onClick={() => {
+                  setGenerateModalVisible(false)
+                  setModalMinimized(false)
+                  setSelectedTags({})
+                }}
+                style={{ borderRadius: 8 }}
+              >
+                取消
+              </Button>
+              <Button
+                type="primary"
+                loading={submittingQuestions}
+                onClick={async () => {
+                  if (!interviewId) return
+                  if (selectedDifficultyLevels.length === 0) {
+                    message.error('请至少选择一个题库')
+                    return
+                  }
+                  const tagEntries = Object.entries(selectedTags)
+                  if (tagEntries.length === 0) {
+                    message.error('请至少选择一个标签')
+                    return
+                  }
+                  const questionCount = tagEntries.reduce((sum, [, count]) => sum + count, 0)
+                  const categoryCounts: Record<string, number> = {}
+                  tagEntries.forEach(([tag, count]) => { categoryCounts[tag] = count })
+                  setSubmittingQuestions(true)
+                  setGenerating(true)
+                  setStreamMinimized(false)
+                  setStreamContent('')
+                  setGenerateModalVisible(false)
+                  setModalMinimized(false)
+                  setSubmittingQuestions(false)
+                  try {
+                    await generateQuestions(interviewId!, {
+                      difficultyLevels: selectedDifficultyLevels,
+                      distributions: difficultyDistributions,
+                      questionCount: questionCount,
+                      selectedCategories: Object.keys(selectedTags),
+                      categoryCounts: categoryCounts,
+                      onChunk: (chunk) => {
+                        setStreamContent(prev => prev + chunk)
+                      },
+                    })
+                    message.success('问题生成完成！')
+                    loadInterview()
+                  } catch (error: any) {
+                    message.error(error.message || '生成问题失败')
+                  } finally {
+                    setGenerating(false)
+                  }
+                }}
+                style={{ borderRadius: 8 }}
+              >
+                确认生成
+              </Button>
+            </div>
           </div>
-          <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordWrap: 'break-word', fontSize: 13, color: colors.textPrimary }}>
-            {streamContent}
-          </pre>
         </div>
+      )}
+
+      {/* 收起状态 - 右下角小浮窗 */}
+      {modalMinimized && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 20,
+            right: 20,
+            zIndex: 1001,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0,
+          }}
+        >
+          <div
+            onClick={() => setModalMinimized(false)}
+            style={{
+              background: colors.surface,
+              border: `1px solid ${colors.primary}40`,
+              borderRadius: '10px 0 0 10px',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              boxShadow: isDark ? '0 4px 16px rgba(0,0,0,0.4)' : '0 4px 16px rgba(0,0,0,0.12)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.06)' : colors.surfaceHover
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = colors.surface
+            }}
+          >
+            <RobotOutlined style={{ color: colors.primary, fontSize: 16 }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary }}>生成问题</span>
+            <ExpandOutlined style={{ color: colors.textTertiary, fontSize: 14 }} />
+          </div>
+          <div
+            onClick={(e) => {
+              e.stopPropagation()
+              setGenerateModalVisible(false)
+              setModalMinimized(false)
+              setSelectedTags({})
+            }}
+            style={{
+              background: colors.surface,
+              border: `1px solid ${colors.primary}40`,
+              borderLeft: 'none',
+              borderRadius: '0 10px 10px 0',
+              padding: '10px 12px',
+              cursor: 'pointer',
+              boxShadow: isDark ? '0 4px 16px rgba(0,0,0,0.4)' : '0 4px 16px rgba(0,0,0,0.12)',
+              display: 'flex',
+              alignItems: 'center',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = isDark ? 'rgba(255,77,79,0.15)' : '#fff1f0'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = colors.surface
+            }}
+          >
+            <CloseOutlined style={{ color: colors.textTertiary, fontSize: 14 }} />
+          </div>
+        </div>
+      )}
+        </>,
+        document.body
+      )}
+
+      {/* 流式生成内容展示（Portal 到 body） */}
+      {generating && streamContent && createPortal(
+        <>
+          {!streamMinimized && (
+            <div style={{
+              position: 'fixed',
+              bottom: 20,
+              right: 20,
+              width: 400,
+              maxHeight: 300,
+              background: colors.surface,
+              border: `1px solid ${colors.primary}40`,
+              borderRadius: 12,
+              overflow: 'hidden',
+              zIndex: 1000,
+              boxShadow: isDark ? '0 4px 16px rgba(0,0,0,0.4)' : '0 4px 16px rgba(0,0,0,0.2)',
+              display: 'flex',
+              flexDirection: 'column',
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 16px',
+                borderBottom: `1px solid ${colors.border}`,
+                flexShrink: 0,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: colors.primary, fontWeight: 600, fontSize: 13 }}>
+                  <RobotOutlined spin />
+                  正在生成问题...
+                </div>
+                <Tooltip title="收起">
+                  <Button
+                    type="text"
+                    icon={<MinusOutlined />}
+                    size="small"
+                    onClick={() => setStreamMinimized(true)}
+                    style={{ borderRadius: 6 }}
+                  />
+                </Tooltip>
+              </div>
+              <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+                <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordWrap: 'break-word', fontSize: 13, color: colors.textPrimary }}>
+                  {streamContent}
+                </pre>
+              </div>
+            </div>
+          )}
+
+          {streamMinimized && (
+            <div
+              onClick={() => setStreamMinimized(false)}
+              style={{
+                position: 'fixed',
+                bottom: 20,
+                right: 20,
+                zIndex: 1001,
+                background: colors.surface,
+                border: `1px solid ${colors.primary}40`,
+                borderRadius: 10,
+                padding: '10px 16px',
+                cursor: 'pointer',
+                boxShadow: isDark ? '0 4px 16px rgba(0,0,0,0.4)' : '0 4px 16px rgba(0,0,0,0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.06)' : colors.surfaceHover
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = colors.surface
+              }}
+            >
+              <RobotOutlined spin style={{ color: colors.primary, fontSize: 16 }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary }}>生成中...</span>
+              <ExpandOutlined style={{ color: colors.textTertiary, fontSize: 14 }} />
+            </div>
+          )}
+        </>,
+        document.body
       )}
 
       <style>{`

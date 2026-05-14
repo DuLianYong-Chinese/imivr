@@ -34,7 +34,8 @@ const difficultyConfig: Record<string, { label: string; color: string; bgColor: 
 
 export default function InterviewDetail() {
   const { message } = App.useApp()
-  const { colors } = useThemeStore()
+  const { colors, config } = useThemeStore()
+  const isDark = config.mode === 'dark'
   const { setCurrentInterview } = useAppStore()
   const { jobRole, interviewId } = useParams<{ jobRole: string; interviewId: string }>()
   const navigate = useNavigate()
@@ -78,6 +79,7 @@ export default function InterviewDetail() {
   const [selectedDifficultyLevels, setSelectedDifficultyLevels] = useState<string[]>([])
   const [difficultyDistributions, setDifficultyDistributions] = useState<Record<string, number>>({})
   const [selectedTags, setSelectedTags] = useState<Record<string, number>>({})
+  const [selectedTagFilter, setSelectedTagFilter] = useState<string | null>(null)
   const [candidateDetailExpanded, setCandidateDetailExpanded] = useState(false)
   const [interviewerRatings, setInterviewerRatings] = useState({
     communication: 0,
@@ -283,7 +285,7 @@ export default function InterviewDetail() {
     return colorMap[category] || colors.primary
   }
 
-  const getCategoryIcon = (category: string) => {
+  const getCategoryIcon = (category: string, isActive: boolean = false) => {
     const iconMap: Record<string, string> = {
       '技术类': '⚡',
       '项目类': '🏗',
@@ -293,7 +295,43 @@ export default function InterviewDetail() {
       '领导力类': '👑',
       '行业洞察类': '💡',
     }
-    return <span style={{ fontSize: 14 }}>{iconMap[category] || '📌'}</span>
+    const catColor = getCategoryColor(category)
+    if (iconMap[category]) {
+      return (
+        <span style={{
+          fontSize: 14,
+          lineHeight: 1,
+          width: 22,
+          height: 22,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: 6,
+          background: isActive
+            ? isDark ? `${catColor}25` : `${catColor}15`
+            : isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+          transition: 'all 0.2s ease',
+        }}>{iconMap[category]}</span>
+      )
+    }
+    return (
+      <span style={{
+        fontSize: 12,
+        fontWeight: 700,
+        color: catColor,
+        lineHeight: 1,
+        width: 22,
+        height: 22,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 6,
+        background: isActive
+          ? isDark ? `${catColor}25` : `${catColor}15`
+          : isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+        transition: 'all 0.2s ease',
+      }}>{category.charAt(0)}</span>
+    )
   }
 
   const loadInterview = async () => {
@@ -1104,55 +1142,184 @@ export default function InterviewDetail() {
                           </Button>
                         </div>
                       </div>
-                      <div style={{ flex: 1, overflowY: 'auto' }}>
-                      {(editedQuestions.length > 0 ? editedQuestions : sortedQuestions(interview.questions.questions || [])).map((q, index) => (
-                        <Card key={index} size="small" style={{ marginBottom: 12, background: colors.surface, borderColor: colors.border }} extra={
-                          <Space>
-                            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => setEditingQuestionIndex(index)} disabled={isCompleted}>编辑</Button>
-                            <Button type="link" size="small" danger icon={<DeleteOutlined />} disabled={isCompleted} onClick={() => {
-                              const cur = editedQuestions.length > 0 ? [...editedQuestions] : sortedQuestions(interview.questions?.questions || [])
-                              setEditedQuestions(cur.filter((_, i) => i !== index))
-                              message.success('题目已删除')
-                            }}>删除</Button>
-                          </Space>
-                        } title={
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span>Q{index + 1}</span>
-                            {q.category && <Tag color="geekblue">{q.category}</Tag>}
-                            {q.difficulty && <Tag color={
-                              q.difficulty === 'L1-初级' ? 'green' :
-                              q.difficulty === 'L2-中级' ? 'blue' :
-                              q.difficulty === 'L3-高级' ? 'orange' :
-                              q.difficulty === 'L4-专家' ? 'red' :
-                              q.difficulty === 'L5-大神' ? 'purple' : 'default'
-                            }>{q.difficulty}</Tag>}
+                      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
+                        {/* 左侧标签导航 */}
+                        <div style={{
+                          width: 220,
+                          flexShrink: 0,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          overflow: 'hidden',
+                          borderRight: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                          background: isDark ? 'rgba(255,255,255,0.02)' : colors.surfaceHover,
+                        }}>
+                          <div style={{
+                            flexShrink: 0,
+                            padding: '14px 16px 10px',
+                            borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
+                          }}>
+                            <div style={{ fontSize: 12, fontWeight: 600, color: colors.textTertiary, letterSpacing: 1, textTransform: 'uppercase' }}>标签筛选</div>
                           </div>
-                        }>
-                          {editingQuestionIndex === index ? (
-                            <div>
-                              <Input.TextArea value={q.question} onChange={(e) => {
-                                const cur = editedQuestions.length > 0 ? [...editedQuestions] : sortedQuestions(interview.questions?.questions || [])
-                                cur[index] = { ...cur[index], question: e.target.value }
-                                setEditedQuestions(cur)
-                              }} rows={3} style={{ marginBottom: 8 }} placeholder="问题内容" />
-                              <Input.TextArea value={q.answer} onChange={(e) => {
-                                const cur = editedQuestions.length > 0 ? [...editedQuestions] : sortedQuestions(interview.questions?.questions || [])
-                                cur[index] = { ...cur[index], answer: e.target.value }
-                                setEditedQuestions(cur)
-                              }} rows={4} style={{ marginBottom: 8 }} placeholder="参考答案" />
+                          <div style={{ flex: 1, overflowY: 'auto', padding: '8px 10px' }}>
+                            {(() => {
+                              const allQuestions = editedQuestions.length > 0 ? editedQuestions : sortedQuestions(interview.questions.questions || [])
+                              const categoryCount: Record<string, number> = {}
+                              allQuestions.forEach(q => {
+                                const cat = q.category || '未分类'
+                                categoryCount[cat] = (categoryCount[cat] || 0) + 1
+                              })
+                              const categories = Object.entries(categoryCount).sort(([a], [b]) => a.localeCompare(b))
+                              const activeKey = selectedTagFilter || 'all'
+                              const navItemStyle = (isActive: boolean) => ({
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 10,
+                                padding: '9px 12px',
+                                borderRadius: 8,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                marginBottom: 2,
+                                background: isActive
+                                  ? isDark ? 'rgba(255,255,255,0.08)' : colors.primaryBg
+                                  : 'transparent',
+                                borderLeft: isActive ? `3px solid ${colors.primary}` : '3px solid transparent',
+                                color: isActive ? colors.primary : colors.textSecondary,
+                                fontWeight: isActive ? 600 : 400,
+                              })
+                              return (
+                                <>
+                                  <div
+                                    style={navItemStyle(activeKey === 'all')}
+                                    onClick={() => setSelectedTagFilter(null)}
+                                    onMouseEnter={(e) => {
+                                      if (activeKey !== 'all') {
+                                        e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'
+                                      }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      if (activeKey !== 'all') {
+                                        e.currentTarget.style.background = 'transparent'
+                                      }
+                                    }}
+                                  >
+                                    <span style={{ fontSize: 15, lineHeight: 1 }}>📋</span>
+                                    <span style={{ fontSize: 13, flex: 1 }}>全部问题</span>
+                                    <span style={{
+                                      fontSize: 11,
+                                      fontWeight: 700,
+                                      color: activeKey === 'all' ? colors.primary : colors.textTertiary,
+                                      background: activeKey === 'all'
+                                        ? isDark ? 'rgba(255,255,255,0.06)' : `${colors.primary}15`
+                                        : isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+                                      padding: '2px 8px',
+                                      borderRadius: 10,
+                                      minWidth: 24,
+                                      textAlign: 'center',
+                                    }}>{allQuestions.length}</span>
+                                  </div>
+                                  {categories.map(([cat, count]) => {
+                                    const catColor = getCategoryColor(cat)
+                                    const isActive = activeKey === cat
+                                    return (
+                                      <div
+                                        key={cat}
+                                        style={navItemStyle(isActive)}
+                                        onClick={() => setSelectedTagFilter(cat)}
+                                        onMouseEnter={(e) => {
+                                          if (!isActive) {
+                                            e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'
+                                          }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          if (!isActive) {
+                                            e.currentTarget.style.background = 'transparent'
+                                          }
+                                        }}
+                                      >
+                                        {getCategoryIcon(cat, isActive)}
+                                        <span style={{ fontSize: 13, flex: 1 }}>{cat}</span>
+                                        <span style={{
+                                          fontSize: 11,
+                                          fontWeight: 700,
+                                          color: isActive ? catColor : colors.textTertiary,
+                                          background: isActive
+                                            ? isDark ? `${catColor}20` : `${catColor}12`
+                                            : isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+                                          padding: '2px 8px',
+                                          borderRadius: 10,
+                                          minWidth: 24,
+                                          textAlign: 'center',
+                                          transition: 'all 0.2s ease',
+                                        }}>{count}</span>
+                                      </div>
+                                    )
+                                  })}
+                                </>
+                              )
+                            })()}
+                          </div>
+                        </div>
+                        {/* 右侧问题列表 */}
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '0 0 0 16px' }}>
+                        {(() => {
+                          const allQuestions = editedQuestions.length > 0 ? editedQuestions : sortedQuestions(interview.questions.questions || [])
+                          const filteredQuestions = selectedTagFilter
+                            ? allQuestions.filter(q => (q.category || '未分类') === selectedTagFilter)
+                            : allQuestions
+                          return filteredQuestions.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '40px 0', color: colors.textTertiary }}>
+                              该标签下暂无问题
+                            </div>
+                          ) : filteredQuestions.map((q, index) => (
+                            <Card key={index} size="small" style={{ marginBottom: 12, background: colors.surface, borderColor: colors.border }} extra={
                               <Space>
-                                <Button type="primary" size="small" onClick={() => setEditingQuestionIndex(null)}>完成</Button>
-                                <Button size="small" onClick={() => setEditingQuestionIndex(null)}>取消</Button>
+                                <Button type="link" size="small" icon={<EditOutlined />} onClick={() => setEditingQuestionIndex(index)} disabled={isCompleted}>编辑</Button>
+                                <Button type="link" size="small" danger icon={<DeleteOutlined />} disabled={isCompleted} onClick={() => {
+                                  const cur = editedQuestions.length > 0 ? [...editedQuestions] : sortedQuestions(interview.questions?.questions || [])
+                                  setEditedQuestions(cur.filter((_, i) => i !== index))
+                                  message.success('题目已删除')
+                                }}>删除</Button>
                               </Space>
-                            </div>
-                          ) : (
-                            <div>
-                              <div style={{ fontWeight: 500, color: colors.textPrimary, marginBottom: 4 }}>{q.question}</div>
-                              {q.answer && <div style={{ color: colors.textSecondary, fontSize: 13 }}>参考答案: {q.answer}</div>}
-                            </div>
-                          )}
-                        </Card>
-                      ))}
+                            } title={
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span>Q{index + 1}</span>
+                                {q.category && <Tag color="geekblue">{q.category}</Tag>}
+                                {q.difficulty && <Tag color={
+                                  q.difficulty === 'L1-初级' ? 'green' :
+                                  q.difficulty === 'L2-中级' ? 'blue' :
+                                  q.difficulty === 'L3-高级' ? 'orange' :
+                                  q.difficulty === 'L4-专家' ? 'red' :
+                                  q.difficulty === 'L5-大神' ? 'purple' : 'default'
+                                }>{q.difficulty}</Tag>}
+                              </div>
+                            }>
+                              {editingQuestionIndex === index ? (
+                                <div>
+                                  <Input.TextArea value={q.question} onChange={(e) => {
+                                    const cur = editedQuestions.length > 0 ? [...editedQuestions] : sortedQuestions(interview.questions?.questions || [])
+                                    cur[index] = { ...cur[index], question: e.target.value }
+                                    setEditedQuestions(cur)
+                                  }} rows={3} style={{ marginBottom: 8 }} placeholder="问题内容" />
+                                  <Input.TextArea value={q.answer} onChange={(e) => {
+                                    const cur = editedQuestions.length > 0 ? [...editedQuestions] : sortedQuestions(interview.questions?.questions || [])
+                                    cur[index] = { ...cur[index], answer: e.target.value }
+                                    setEditedQuestions(cur)
+                                  }} rows={4} style={{ marginBottom: 8 }} placeholder="参考答案" />
+                                  <Space>
+                                    <Button type="primary" size="small" onClick={() => setEditingQuestionIndex(null)}>完成</Button>
+                                    <Button size="small" onClick={() => setEditingQuestionIndex(null)}>取消</Button>
+                                  </Space>
+                                </div>
+                              ) : (
+                                <div>
+                                  <div style={{ fontWeight: 500, color: colors.textPrimary, marginBottom: 4 }}>{q.question}</div>
+                                  {q.answer && <div style={{ color: colors.textSecondary, fontSize: 13 }}>参考答案: {q.answer}</div>}
+                                </div>
+                              )}
+                            </Card>
+                          ))
+                        })()}
+                        </div>
                       </div>
                     </div>
                   )}
