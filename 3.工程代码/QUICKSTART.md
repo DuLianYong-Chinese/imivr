@@ -14,6 +14,7 @@
 
 ```bash
 # 要求 Node.js >= 20
+https://nodejs.org/en/download
 
 # 全局安装
 npm install -g imivr-bobfintech
