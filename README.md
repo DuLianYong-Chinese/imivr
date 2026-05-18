@@ -37,29 +37,7 @@
 
 ### 环境准备
 
-要求 Node.js >= 20，推荐使用 [nvm](https://github.com/nvm-sh/nvm)（Linux/macOS）或 [nvm-windows](https://github.com/coreybutler/nvm-windows)（Windows）管理 Node.js 版本：
-
-**Linux / macOS：**
-```bash
-# 安装 nvm
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-
-# 安装并使用 Node.js 20
-nvm install 20
-nvm use 20
-```
-
-**Windows：**
-```powershell
-# 下载 nvm-windows 安装包
-# https://github.com/coreybutler/nvm-windows/releases
-
-# 安装并使用 Node.js 20
-nvm install 20
-nvm use 20
-```
-
-也可以直接从 [nodejs.org](https://nodejs.org/) 下载 LTS 版本安装。
+- 要求 [Node.js](https://nodejs.org/zh-cn/download) >= 20
 
 ### 安装与启动
 
