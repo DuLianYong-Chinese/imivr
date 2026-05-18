@@ -37,7 +37,7 @@
 
 ### 环境准备
 
-- 要求 [Node.js](https://nodejs.org/zh-cn/download) >= 20
+- 要求 [Node.js](https://nodejs.org/zh-cn/download) >= 20（点击链接可下载安装）
 
 ### 安装与启动
 
