@@ -85,9 +85,9 @@ function loadConfig() {
         id: '1777648353899',
         name: '问答模型',
         provider: 'finna',
-        apiKey: 'app-IkDtFuscGWAj2RHbjRdo7vR7',
+        apiKey: 'app-9VVlZ3bB9je9BI7NkWBVxriV',
         baseURL: 'https://www.finna.com.cn/v1',
-        model: 'deepseek-v4-pro',
+        model: 'deepseek-v4-flash',
         isDefault: true
       }
     ],

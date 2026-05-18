@@ -39,7 +39,7 @@ npx imivr-bobfintech start
 
 ```json
 {
-  "version": "1.0.7",
+  "version": "1.0.8",
   "initialized": true,
   "workspaceRoot": "/home/user/.imivr/workspaces",
   "aiModels": [
@@ -49,7 +49,7 @@ npx imivr-bobfintech start
       "provider": "finna",
       "apiKey": "sk-xxx",
       "baseURL": "https://www.finna.com.cn/v1",
-      "model": "deepseek-v4-pro",
+      "model": "deepseek-v4-flash",
       "isDefault": true
     }
   ],

@@ -751,9 +751,9 @@ export default function InterviewInProgress() {
                     transition: 'all 0.2s ease',
                     background: activeKey === 'all'
                       ? isDark ? 'rgba(255,255,255,0.08)' : colors.primaryBg
-                      : 'transparent',
+                      : isDark ? 'rgba(255,255,255,0.04)' : '#f5f5f5',
                     color: activeKey === 'all' ? colors.primary : colors.textSecondary,
-                    fontWeight: activeKey === 'all' ? 600 : 400,
+                    fontWeight: activeKey === 'all' ? 600 : 500,
                     fontSize: 12,
                   }}
                 >
@@ -765,7 +765,7 @@ export default function InterviewInProgress() {
                     color: activeKey === 'all' ? colors.primary : colors.textTertiary,
                     background: activeKey === 'all'
                       ? isDark ? 'rgba(255,255,255,0.06)' : `${colors.primary}15`
-                      : isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+                      : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
                     padding: '0 5px',
                     borderRadius: 6,
                     lineHeight: '16px',
@@ -788,13 +788,15 @@ export default function InterviewInProgress() {
                         transition: 'all 0.2s ease',
                         background: isActive
                           ? isDark ? `${catColor}18` : `${catColor}12`
-                          : 'transparent',
+                          : isDark ? 'rgba(255,255,255,0.04)' : '#f5f5f5',
                         color: isActive ? catColor : colors.textSecondary,
-                        fontWeight: isActive ? 600 : 400,
+                        fontWeight: 600,
                         fontSize: 12,
                       }}
                     >
-                      {getCategoryIcon(cat, isActive)}
+                        <span style={{ width: 16, display: 'inline-flex', justifyContent: 'center', flexShrink: 0 }}>
+                          {isActive ? <span style={{ fontSize: 12 }}>🎯</span> : getCategoryIcon(cat, isActive)}
+                        </span>
                       <span>{cat}</span>
                       <span style={{
                         fontSize: 10,
@@ -802,7 +804,7 @@ export default function InterviewInProgress() {
                         color: isActive ? catColor : colors.textTertiary,
                         background: isActive
                           ? isDark ? `${catColor}20` : `${catColor}12`
-                          : isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+                          : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
                         padding: '0 5px',
                         borderRadius: 6,
                         lineHeight: '16px',

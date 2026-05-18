@@ -29,7 +29,7 @@ function writeConfig(config: any): void {
 
 const PROVIDER_DEFAULTS: Record<string, { baseURL: string; model: string }> = {
   openai: { baseURL: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
-  finna: { baseURL: 'https://www.finna.com.cn/v1', model: 'deepseek-v4-pro' },
+  finna: { baseURL: 'https://www.finna.com.cn/v1', model: 'deepseek-v4-flash' },
   deepseek: { baseURL: 'https://api.deepseek.com', model: 'deepseek-chat' },
   qwen: { baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-plus' },
 }

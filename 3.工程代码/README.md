@@ -91,7 +91,7 @@ src/
 | 字段 | 值 | 说明 |
 |------|-----|------|
 | `name` | `imivr-bobfintech` | npm 包名 |
-| `version` | `1.0.7` | 当前版本号 |
+| `version` | `1.0.8` | 当前版本号 |
 | `main` | `dist/cli/index.js` | 包入口文件 |
 | `bin` | `{ "imivr": "dist/cli/index.js" }` | CLI 命令注册 |
 | `files` | `["dist/cli", "dist/web"]` | 发布时包含的文件 |
@@ -106,7 +106,7 @@ pnpm typecheck
 pnpm lint
 
 # 2. 更新版本号（遵循 semver 规范）
-# 修改 package.json 中的 version 字段，例如 1.0.7 → 1.0.8
+# 修改 package.json 中的 version 字段，例如 1.0.8 → 1.0.8
 
 # 3. 登录 npm（首次需要）
 npm login

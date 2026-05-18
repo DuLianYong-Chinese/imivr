@@ -1,6 +1,6 @@
 {
   "name": "imivr-bobfintech",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "我是面试官 - 基于本地优先架构的面试辅助系统",
   "type": "module",
   "main": "dist/cli/index.js",
@@ -64,6 +64,9 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "sharp"]
   },
   "keywords": [
     "interview",

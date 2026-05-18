@@ -27,7 +27,7 @@
 
 **「我是面试官」支持的 AI 供应商：**
 
-- finna（默认问答模型：deepseek-v4-pro，默认语音模型：qwen3-asr-flash）
+- finna（默认问答模型：deepseek-v4-flash，默认语音模型：qwen3-asr-flash）
 - deepseek
 - qwen（通义千问）
 - openai

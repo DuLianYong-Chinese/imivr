@@ -35,11 +35,12 @@ const presetWorkspaces = [
   { value: 'ui_designer', label: 'UI设计师', name: 'UI设计师', category: '产品设计' },
 ]
 
-function SectionBlock({ title, description, icon, accentColor, children }: {
+function SectionBlock({ title, description, icon, accentColor, extra, children }: {
   title: string
   description?: string
   icon: React.ReactNode
   accentColor: string
+  extra?: React.ReactNode
   children: React.ReactNode
 }) {
   const { colors } = useThemeStore()
@@ -57,16 +58,19 @@ function SectionBlock({ title, description, icon, accentColor, children }: {
     }}>
       <div style={{ height: 4, background: `linear-gradient(90deg, ${accentColor}, ${accentColor}60, transparent)` }} />
       <div style={{ padding: '20px 28px 24px', flex: 1, overflowY: 'auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: description ? 6 : 16 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: 10,
-            background: `${accentColor}12`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18, color: accentColor,
-          }}>
-            {icon}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: description ? 6 : 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: `${accentColor}12`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 18, color: accentColor,
+            }}>
+              {icon}
+            </div>
+            <div style={{ fontSize: 17, fontWeight: 700, color: colors.textPrimary }}>{title}</div>
           </div>
-          <div style={{ fontSize: 17, fontWeight: 700, color: colors.textPrimary }}>{title}</div>
+          {extra && <div>{extra}</div>}
         </div>
         {description && (
           <div style={{ fontSize: 13, color: colors.textTertiary, marginBottom: 18, paddingLeft: 48 }}>{description}</div>
@@ -730,7 +734,7 @@ export default function Settings() {
         label="配置名称"
         rules={[{ required: true, message: '请输入配置名称' }]}
       >
-        <Input placeholder={isVoice ? '例如：qwen3-asr-flash' : '例如：deepseek-v4-pro'} style={{ borderRadius: 8 }} />
+        <Input placeholder={isVoice ? '例如：qwen3-asr-flash' : '例如：deepseek-v4-flash'} style={{ borderRadius: 8 }} />
       </Form.Item>
 
       <Form.Item
@@ -773,7 +777,7 @@ export default function Settings() {
         label="模型名称"
         rules={[{ required: true, message: '请输入模型名称' }]}
       >
-        <Input placeholder={isVoice ? '例如：qwen3-asr-flash 或自定义语音模型名' : '例如：deepseek-v4-pro 或自定义模型名'} style={{ borderRadius: 8 }} />
+        <Input placeholder={isVoice ? '例如：qwen3-asr-flash 或自定义语音模型名' : '例如：deepseek-v4-flash 或自定义模型名'} style={{ borderRadius: 8 }} />
       </Form.Item>
 
       <Form.Item
@@ -893,28 +897,26 @@ export default function Settings() {
         description="用于问答和出题的大语言模型配置"
         icon={<RobotOutlined />}
         accentColor="#722ed1"
+        extra={aiModels.length > 0 ? (
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()} style={{ borderRadius: 8, height: 36 }}>
+            添加模型
+          </Button>
+        ) : undefined}
       >
         {aiModels.length > 0 ? (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()} style={{ borderRadius: 8, height: 36 }}>
-                添加模型
-              </Button>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
-              {aiModels.map(model => (
-                <ModelCard
-                  key={model.id}
-                  model={model}
-                  isDefault={model.isDefault || false}
-                  accentColor="#722ed1"
-                  onEdit={() => openModal(model)}
-                  onDelete={() => handleDeleteModel(model.id)}
-                  onSetDefault={() => handleSetDefault(model.id)}
-                />
-              ))}
-            </div>
-          </>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
+            {aiModels.map(model => (
+              <ModelCard
+                key={model.id}
+                model={model}
+                isDefault={model.isDefault || false}
+                accentColor="#722ed1"
+                onEdit={() => openModal(model)}
+                onDelete={() => handleDeleteModel(model.id)}
+                onSetDefault={() => handleSetDefault(model.id)}
+              />
+            ))}
+          </div>
         ) : (
           <EmptyState
             icon={<RobotOutlined />}
@@ -930,27 +932,25 @@ export default function Settings() {
         description="用于语音识别和合成的模型配置"
         icon={<AudioOutlined />}
         accentColor="#13c2c2"
+        extra={aiVoiceModels.length > 0 ? (
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => openVoiceModal()} style={{ borderRadius: 8, height: 36 }}>
+            添加语音模型
+          </Button>
+        ) : undefined}
       >
         {aiVoiceModels.length > 0 ? (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => openVoiceModal()} style={{ borderRadius: 8, height: 36 }}>
-                添加语音模型
-              </Button>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
-              {aiVoiceModels.map(model => (
-                <VoiceModelCard
-                  key={model.id}
-                  model={model}
-                  isDefault={model.isDefault || false}
-                  onEdit={() => openVoiceModal(model)}
-                  onDelete={() => handleDeleteVoiceModel(model.id)}
-                  onSetDefault={() => handleSetDefaultVoiceModel(model.id)}
-                />
-              ))}
-            </div>
-          </>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
+            {aiVoiceModels.map(model => (
+              <VoiceModelCard
+                key={model.id}
+                model={model}
+                isDefault={model.isDefault || false}
+                onEdit={() => openVoiceModal(model)}
+                onDelete={() => handleDeleteVoiceModel(model.id)}
+                onSetDefault={() => handleSetDefaultVoiceModel(model.id)}
+              />
+            ))}
+          </div>
         ) : (
           <EmptyState
             icon={<AudioOutlined />}
